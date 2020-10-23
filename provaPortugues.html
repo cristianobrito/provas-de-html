@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    @import url(https://fonts.googleapis.com/css?family=Work+Sans:300,600);
+
+body{
+	font-size: 20px;
+	font-family: 'Work Sans', sans-serif;
+	color: #333;
+    font-weight: 300;
+    text-align: center;
+    background-color: #f8f6f0;
+}
+h1{
+    font-weight: 300;
+    margin: 0px;
+    padding: 10px;
+    font-size: 20px;
+    background-color: #444;
+    color: #fff;
+}
+.question{
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+.answers {
+    margin-bottom: 20px;
+    text-align: left;
+    display: inline-block;
+}
+.answers label{
+    display: block;
+    margin-bottom: 10px;
+}
+button{
+    font-family: 'Work Sans', sans-serif;
+	font-size: 22px;
+	background-color: #279;
+	color: #fff;
+	border: 0px;
+	border-radius: 3px;
+	padding: 20px;
+	cursor: pointer;
+	margin-bottom: 20px;
+}
+button:hover{
+	background-color: #38a;
+}
+
+.slide{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+.active-slide{
+    opacity: 1;
+    z-index: 2;
+}
+.quiz-container{
+    position: relative;
+    height: 200px;
+    margin-top: 40px;
+}
+</style>
+</head>
+<body>
+ <h1>PROVA DE PORTUGUÊS DO AKILLES</h1>
+<div class="quiz-container">
+  <div id="quiz"></div>
+</div>
+<button id="previous">ANTERIOR</button>
+<button id="next">PROXIMA</button>
+<button id="submit">CONFIRMA</button>
+<div id="results"></div>
+    
+  <script>
+        (function(){
+    // FUNÇÕES
+  function buildQuiz(){
+    // VARIÁVEL PARA ARMAZENAR A SAÍDA HTML
+    const output = [];
+
+    // PARA CADA PERGUNTA
+    myQuestions.forEach(
+      (currentQuestion, questionNumber) => {
+
+    // VARIÁVEL PARA ARMAZENAR A LISTA DE RESPOSTAS POSSÍVEIS
+        const answers = [];
+
+    // E PARA CADA RESPOSTA DISPONÍVEL
+        for(letter in currentQuestion.answers){
+
+    // ADICIONANDO BOTÃO DE RADIO HTML
+          answers.push(
+            `<label>
+              <input type="radio" name="question${questionNumber}" value="${letter}">
+              ${letter} :
+              ${currentQuestion.answers[letter]}
+            </label>`
+          );
+        }
+
+    // ADICIONAR ESTA PERGUNTA E SUAS RESPOSTAS PARA A SAÍDA
+        output.push(
+          `<div class="slide">
+            <div class="question"> ${currentQuestion.question} </div>
+            <div class="answers"> ${answers.join("")} </div>
+          </div>`
+        );
+      }
+    );
+
+    //FINALMENTE COMBINAR NOSSA LISTA DE SAÍDA EM UMA SEQUÊNCIA DE HTML E COLOCÁ-LO NA PÁGINA
+    quizContainer.innerHTML = output.join('');
+  }
+
+  function showResults(){
+
+    //REUNIR RECIPIENTES RESPOSTA DE NOSSO QUIZ
+    const answerContainers = quizContainer.querySelectorAll('.answers');
+
+    // MANTER O CONTROLE DAS RESPOSTAS DO USUÁRIO
+    let numCorrect = 0;
+
+    // PARA CADA PERGUNTA
+    myQuestions.forEach( (currentQuestion, questionNumber) => {
+
+    // ENCONTRAR RESPOSTA SELECIONADA
+      const answerContainer = answerContainers[questionNumber];
+      const selector = `input[name=question${questionNumber}]:checked`;
+      const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+
+    // SE A RESPOSTA ESTIVER CORRETA
+      if(userAnswer === currentQuestion.correctAnswer){
+    //ADICIONAR AO NÚMERO DE RESPOSTAS CORRETAS
+        numCorrect++;
+
+    // COR DAS RESPOSTAS VERDES
+        answerContainers[questionNumber].style.color = 'lightgreen';
+      }
+    // SE A RESPOSTA ESTÁ ERRADA OU EM BRANCO
+      else{
+    // COR DAS RESPOSTAS VERMELHAS
+        answerContainers[questionNumber].style.color = 'red';
+      }
+    });
+
+    // MOSTRAR NÚMERO DE RESPOSTAS CORRETAS DO TOTAL
+    resultsContainer.innerHTML = `${numCorrect} out of ${myQuestions.length}`;
+  }
+
+  function showSlide(n) {
+    slides[currentSlide].classList.remove('active-slide');
+    slides[n].classList.add('active-slide');
+    currentSlide = n;
+    if(currentSlide === 0){
+      previousButton.style.display = 'none';
+    }
+    else{
+      previousButton.style.display = 'inline-block';
+    }
+    if(currentSlide === slides.length-1){
+      nextButton.style.display = 'none';
+      submitButton.style.display = 'inline-block';
+    }
+    else{
+      nextButton.style.display = 'inline-block';
+      submitButton.style.display = 'none';
+    }
+  }
+
+  function showNextSlide() {
+    showSlide(currentSlide + 1);
+  }
+
+  function showPreviousSlide() {
+    showSlide(currentSlide - 1);
+  }
+
+  // VARIÁVEIS
+  const quizContainer = document.getElementById('quiz');
+  const resultsContainer = document.getElementById('results');
+  const submitButton = document.getElementById('submit');
+  const myQuestions = [
+    {
+      question: "(1) Qual o nome do filme que as meninas assistiram?&#128250  ",
+      answers: {
+        a: "Cibele e Alice",
+        b: "Cibele",
+        c: "Cinderela",
+        d: "Alice no País das Maravilhas" 
+      },
+      correctAnswer: "c"
+    },
+    {
+      question: "(2) Qual o próximo filme que Cibele e Alice irão assistir juntas? &#128252 &#128249",
+      answers: {
+        a: "Alice no País das Maravilhas",
+        b: "Cinderela",
+        c: "Cibele e Alice",
+        d: "Cibele" 
+      },
+      correctAnswer: "a"
+    },
+    {
+      question: "(3) Qual o nome da mãe de Cibele?&#127804",
+      answers: {
+        a: "D. Alice",
+        b: "D. Cibele",
+        c: "D. Lurdes",
+        d: "D. Cecília" 
+      },
+      correctAnswer: "d"
+    },
+    {
+      question: "(4) Responda substantivo Coletivo:&#128029;",
+      answers: {
+        a: "enxame",
+        b: "televisão",
+        c: "Pedro",
+        d: "planta" 
+      },
+      correctAnswer: "a"
+    },
+    {
+      question: "(5) Responda substantivo Próprio: &#128102",
+      answers: {
+        a: "planta",
+        b: "feijão",
+        c: "Pedro",
+        d: "televisão"  
+      },
+      correctAnswer: "c"
+    },
+    {
+    question: "(6) Responda substantivo Comum: &#127807",
+      answers: {
+        a: "Canada",
+        b: "feijão",
+        c: "Pedro",
+        d: "Itália" 
+      },
+      correctAnswer: "b"
+    },
+    {
+    question: "(7) Responda substantivo coletivo:&#127815 ",
+      answers: {
+        a: "Itália",
+        b: "feijão",
+        c: "Pedro",
+        d: "cacho" 
+      },
+      correctAnswer: "d"
+    }, 
+    {
+    question: "(8) Responda substantivo Próprio: &#128104.",
+      answers: {
+        a: "televisão",
+        b: "cacho",
+        c: "feijão",
+        d: "Itália" 
+      },
+      correctAnswer: "d"
+    }, 
+    {
+    question: "(9) Responda substantivo comum: &#127804 .",
+      answers: {
+        a: "álbum",
+        b: "cacho",
+        c: "planta",
+        d: "Itália" 
+      },
+      correctAnswer: "c"
+    },
+    {
+    question: "(10) Responda substantivo coletivo: &#128211",
+      answers: {
+        a: "álbum",
+        b: "feijão",
+        c: "televisão",
+        d: "Pedro" 
+      },
+      correctAnswer: "a"
+    },
+    {
+    question: "(11) Responda substantivo coletivo:&#127815",
+      answers: {
+        a: "cacho",
+        b: "planta",
+        c: "Pedro",
+        d: "Itália" 
+      },
+      correctAnswer: "a"
+    },
+   {
+    question: "(12) Responda Antônimo SUBIR: &#127906",
+      answers: {
+        a: "belo",
+        b: "bonito",
+        c: "acordar",
+        d: "descer" 
+      },
+      correctAnswer: "d"
+    },
+    {
+    question: "(13) Responda Antônimo FELIZ: &#128546",
+      answers: {
+        a: "casado",
+        b: "felizmente",
+        c: "triste",
+        d: "infeliz" 
+      },
+      correctAnswer: "d"
+    },
+    {
+    question: "(14) Responda Antônimo COMPRAR: &#128181",
+      answers: {
+        a: "fiador",
+        b: "alugar",
+        c: "vender",
+        d: "descomprar" 
+      },
+      correctAnswer: "c"
+    },
+    {
+    question: "(15) Responda antônimo VÁLIDO: &#128716",
+      answers: {
+        a: "inválido",
+        b: "validado",
+        c: "validar",
+        d: "valer" 
+      },
+      correctAnswer: "a"
+    },
+    {
+    question: "(16) Responda sinônimo CALMO: &#128692",
+      answers: {
+        a: "legal",
+        b: "rapido",
+        c: "leve",
+        d: "tranquilo" 
+      },
+      correctAnswer: "d"
+    },
+    {
+    question: "(17) Responda sinônimo BONITO: &#129333",
+      answers: {
+        a: "lindo",
+        b: "belo",
+        c: "leve",
+        d: "feio" 
+      },
+      correctAnswer: "b"
+    },  
+    {
+    question: "(18) Responda sinônimo ACORDAR: &#128716",
+      answers: {
+        a: "dormir",
+        b: "dedo",
+        c: "despertar",
+        d: "sono" 
+      },
+      correctAnswer: "c"
+    }, 
+    {
+    question: "(19) Responda sinônimo LONGE: &#128693",
+      answers: {
+        a: "distante",
+        b: "fechado",
+        c: "cedo",
+        d: "perto" 
+      },
+      correctAnswer: "a"
+    },
+    {
+    question: "(20) passe para o masculino: A garota soltou as vacas no pasto. &#128003",
+      answers: {
+        a: "O garoto soltou os bois no pasto",
+        b: "O garoto soltou o boi no pasto",
+        c: "O garoto soltou a vaca no pasto",
+        d: "O garoto soltou a vaca no pasto" 
+      },
+      correctAnswer: "a"
+    },  
+    {
+    question: "(21) passe para o masculino: A atriz ganhou uma cadela branquinha. &#128021",
+      answers: {
+        a: "O ator ganhou umas cadelas branquinhas",
+        b: "O ator ganhou uma cadela branca",
+        c: "O ator ganhou uns cachorros branquinhos",
+        d: "O ator ganhou um cachorro branquinho" 
+      },
+      correctAnswer: "d"
+    }, 
+    {
+    question: "(22) passe para o masculino: Fui ao parque com a minha madrinha. &#128146",
+      answers: {
+        a: "Fui ao parque com meu pai",
+        b: "Fui ao parque com meu padrinho",
+        c: "Fui ao parque com meu madrinho",
+        d: "Fui ao parque com meu tio" 
+      },
+      correctAnswer: "b"
+    }, 
+    {
+    question: "(23) passe para o masculino: Entrou uma galinha no quarto da minha irmã. &#128019 &#128020",
+      answers: {
+        a: "Entrou um galo no quarto da minha mãe",
+        b: "Entrou um galo no quarto da minha irmã",
+        c: "Entrou um galo no quarto do meu irmão",
+        d: "Entrou uma galinha no quarto do meu irmão" 
+      },
+      correctAnswer: "c"
+    },
+    {
+    question: "(24) Ache o plural MÃE: &#128106",
+      answers: {
+        a: "mãis",
+        b: "mãezonas",
+        c: "mães",
+        d: "mão" 
+      },
+      correctAnswer: "c"
+    },
+    {
+    question: "(25) Ache o plural ANEL: &#128141",
+      answers: {
+        a: "anélis",
+        b: "anéus",
+        c: "anélus",
+        d: "anéis" 
+      },
+      correctAnswer: "d"
+    },
+    {
+    question: "(26) Ache o plural NARIZ: &#128067",
+      answers: {
+        a: "narizes",
+        b: "narius",
+        c: "narigões",
+        d: "naris" 
+      },
+      correctAnswer: "a"
+    },
+    {
+    question: "(27) Ache o plural TREM: &#128669",
+      answers: {
+        a: "trilhos",
+        b: "trens",
+        c: "vagões",
+        d: "trenzis" 
+      },
+      correctAnswer: "b"
+    },
+    {
+    question: "(28) Ache o plural CARTAZ: &#128146",
+      answers: {
+        a: "cartas",
+        b: "cartáz",
+        c: "cartazes",
+        d: "cartões" 
+      },
+      correctAnswer: "c"
+    },
+    {
+    question: "(29) De o diminutivo PORCO: &#128055",
+      answers: {
+        a: "vara",
+        b: "porcão",
+        c: "porquinho",
+        d: "porcalhão" 
+      },
+      correctAnswer: "c"
+    },
+    {
+    question: "(30) De o diminutivo BONECA: &#128146",
+      answers: {
+        a: "bonecão",
+        b: "bonequinha",
+        c: "bonecara",
+        d: "bonecas" 
+      },
+      correctAnswer: "b"
+    },
+    {
+    question: "(31) De o diminutivo MULHER: &#128146",
+      answers: {
+        a: "mulherzinha",
+        b: "mulherão",
+        c: "mulher pequena",
+        d: "mulherinha" 
+      },
+      correctAnswer: "a"
+    },
+    {
+    question: "(32) De o aumentativo CASA: &#128146",
+      answers: {
+        a: "casão",
+        b: "casarão",
+        c: "casebre",
+        d: "casinha" 
+      },
+      correctAnswer: "b"
+    },
+    {
+    question: "(33) De o aumentativo NARIZ: &#128067",
+      answers: {
+        a: "narigote",
+        b: "narigarra",
+        c: "narigão",
+        d: "narizão" 
+      },
+      correctAnswer: "c"
+    },
+    {
+      question: "(34) De o aumentativo CADEIRA: &#128509 &#129501",
+      answers: {
+        a: "cadeira de balanço",
+        b: "cadera grande",
+        c: "cadeirona",
+        d: "cadeirão"
+      },
+      correctAnswer: "c"
+    }
+  ];
+
+  //dar o pontapé inicial as coisas
+  buildQuiz();
+
+  // paginação
+  const previousButton = document.getElementById("previous");
+  const nextButton = document.getElementById("next");
+  const slides = document.querySelectorAll(".slide");
+  let currentSlide = 0;
+
+  // mostre o primeiro slider
+  showSlide(currentSlide);
+
+  // ouvintes de eventos
+  submitButton.addEventListener('click', showResults);
+  previousButton.addEventListener("click", showPreviousSlide);
+  nextButton.addEventListener("click", showNextSlide);
+})();
+    </script>
+</body>
+</html>
